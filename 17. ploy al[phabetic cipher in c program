@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <string.h>
+void encrypt(char* plaintext, char* keyword, char* ciphertext) {
+    int textLen = strlen(plaintext);
+    int keyLen = strlen(keyword);
+    int j = 0; 
+    for (int i = 0; i < textLen; i++) {
+        char ch = plaintext[i];
+        if (ch >= 'A' && ch <= 'Z') {
+            ciphertext[i] = (ch - 'A' + (keyword[j % keyLen] - 'A')) % 26 + 'A';
+            j++;
+        }
+        else if (ch >= 'a' && ch <= 'z') {
+            ciphertext[i] = (ch - 'a' + (keyword[j % keyLen] - 'a')) % 26 + 'a';
+            j++;
+        }
+        else {
+            ciphertext[i] = ch;
+        }
+    }
+    ciphertext[textLen] = '\0'; 
+}
+void decrypt(char* ciphertext, char* keyword, char* plaintext) {
+    int textLen = strlen(ciphertext);
+    int keyLen = strlen(keyword);
+    int j = 0; 
+    for (int i = 0; i < textLen; i++) {
+        char ch = ciphertext[i];
+        if (ch >= 'A' && ch <= 'Z') {
+            plaintext[i] = (ch - 'A' - (keyword[j % keyLen] - 'A') + 26) % 26 + 'A';
+            j++;
+        }
+        else if (ch >= 'a' && ch <= 'z') {
+            plaintext[i] = (ch - 'a' - (keyword[j % keyLen] - 'a') + 26) % 26 + 'a';
+            j++;
+        }
+        else {
+            plaintext[i] = ch;
+        }
+    }
+    plaintext[textLen] = '\0'; 
+}
+int main() {
+	printf("keshav reddy (192210248)\n");
+    char plaintext[100], keyword[100], ciphertext[100];
+    printf("Enter the plaintext: ");
+    gets(plaintext);
+    printf("Enter the keyword: ");
+    gets(keyword);
+    encrypt(plaintext, keyword, ciphertext);
+    printf("Encrypted text: %s\n", ciphertext);
+    decrypt(ciphertext, keyword, plaintext);
+    printf("Decrypted text: %s\n", plaintext);
+    return 0;
+}
