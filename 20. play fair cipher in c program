@@ -1,0 +1,130 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#define SIZE 5
+void prepare_text(char *text, char *processed_text) {
+    int len = strlen(text);
+    int i, j = 0;
+
+    for (i = 0; i < len; i++) {
+        if (isalpha(text[i])) {
+            processed_text[j++] = toupper(text[i]);
+        }
+    }
+    processed_text[j] = '\0';
+}
+void generate_key_square(char key[], char key_square[SIZE][SIZE]) {
+    int i, j, k, len;
+    int flag[26] = {0};
+    len = strlen(key);
+    j = 0; k = 0;
+    for (i = 0; i < len; i++) {
+        if (key[i] == 'J') key[i] = 'I';
+        if (flag[key[i] - 'A'] == 0) {
+            key_square[j][k++] = key[i];
+            flag[key[i] - 'A'] = 1;
+            if (k == SIZE) {
+                k = 0;
+                j++;
+            }
+        }
+    }
+    for (i = 0; i < 26; i++) {
+        if (i == 'J' - 'A') continue;
+        if (flag[i] == 0) {
+            key_square[j][k++] = i + 'A';
+            if (k == SIZE) {
+                k = 0;
+                j++;
+            }
+        }
+    }
+}
+void find_position(char ch, char key_square[SIZE][SIZE], int *row, int *col) {
+    int i, j;
+
+    for (i = 0; i < SIZE; i++) {
+        for (j = 0; j < SIZE; j++) {
+            if (key_square[i][j] == ch) {
+                *row = i;
+                *col = j;
+                return;
+            }
+        }
+    }
+}
+void playfair_encrypt(char plaintext[], char key_square[SIZE][SIZE], char ciphertext[]) {
+    int i, row1, col1, row2, col2, len = strlen(plaintext);
+    for (i = 0; i < len; i += 2) {
+        find_position(plaintext[i], key_square, &row1, &col1);
+        find_position(plaintext[i + 1], key_square, &row2, &col2);
+        if (row1 == row2) {
+            ciphertext[i] = key_square[row1][(col1 + 1) % SIZE];
+            ciphertext[i + 1] = key_square[row2][(col2 + 1) % SIZE];
+        } else if (col1 == col2) {
+            ciphertext[i] = key_square[(row1 + 1) % SIZE][col1];
+            ciphertext[i + 1] = key_square[(row2 + 1) % SIZE][col2];
+        } else {
+            ciphertext[i] = key_square[row1][col2];
+            ciphertext[i + 1] = key_square[row2][col1];
+        }
+    }
+    ciphertext[len] = '\0';
+}
+void playfair_decrypt(char ciphertext[], char key_square[SIZE][SIZE], char plaintext[]) {
+    int i, row1, col1, row2, col2, len = strlen(ciphertext);
+    for (i = 0; i < len; i += 2) {
+        find_position(ciphertext[i], key_square, &row1, &col1);
+        find_position(ciphertext[i + 1], key_square, &row2, &col2);
+        
+        if (row1 == row2) {
+            plaintext[i] = key_square[row1][(col1 - 1 + SIZE) % SIZE];
+            plaintext[i + 1] = key_square[row2][(col2 - 1 + SIZE) % SIZE];
+        } else if (col1 == col2) {
+            plaintext[i] = key_square[(row1 - 1 + SIZE) % SIZE][col1];
+            plaintext[i + 1] = key_square[(row2 - 1 + SIZE) % SIZE][col2];
+        } else {
+            plaintext[i] = key_square[row1][col2];
+            plaintext[i + 1] = key_square[row2][col1];
+        }
+    }
+    plaintext[len] = '\0';
+}
+void process_input_text(char *input) {
+    int i, j = 0, len = strlen(input);
+    char temp[len];
+
+    for (i = 0; i < len; i++) {
+        if (input[i] == 'J') {
+            input[i] = 'I';
+        }
+    }
+    for (i = 0; i < len; i++) {
+        temp[j++] = input[i];
+        if (i < len - 1 && input[i] == input[i + 1]) {
+            temp[j++] = 'X';
+        }
+    }
+    if (j % 2 != 0) {
+        temp[j++] = 'X';
+    }
+    temp[j] = '\0';
+
+    strcpy(input, temp);
+}
+int main() {
+	printf("keshav reddy (192210248)\n");
+    char key[SIZE * SIZE] = "KEYWORD";
+    char key_square[SIZE][SIZE];
+    char plaintext[SIZE * SIZE], ciphertext[SIZE * SIZE];
+    printf("Enter the plaintext: ");
+    scanf("%s", plaintext);
+    prepare_text(plaintext, plaintext);
+    process_input_text(plaintext);
+    generate_key_square(key, key_square);
+    playfair_encrypt(plaintext, key_square, ciphertext);
+    printf("Ciphertext: %s\n", ciphertext);
+    playfair_decrypt(ciphertext, key_square, plaintext);
+    printf("Decrypted text: %s\n", plaintext);
+    return 0;
+}
